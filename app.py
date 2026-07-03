@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Request, Response, Query
 import time
 import uuid
-
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+import uuid
+import time
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -98,4 +100,15 @@ def analytics(payload: dict, x_api_key: str = Header(None)):
         "unique_users": len(users),
         "revenue": revenue,
         "top_user": top_user
+    }
+from fastapi import Request
+import uuid
+
+@app.get("/ping")
+def ping(request: Request):
+    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+
+    return {
+        "email": "23f2005564@ds.study.iitm.ac.in",
+        "request_id": request_id
     }

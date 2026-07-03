@@ -4,6 +4,16 @@ import uuid
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 ALLOWED_ORIGIN = "https://dash-tws8op.example.com"
 
 @app.middleware("http")
@@ -41,3 +51,51 @@ def stats(values: str = Query(...)):
 @app.options("/stats")
 def preflight():
     return Response(status_code=200)
+from fastapi import Header, HTTPException
+
+API_KEY = "ak_tu44gobz72jnn19gs0t5erv7"
+
+
+@app.post("/analytics")
+def analytics(payload: dict, x_api_key: str = Header(None)):
+
+    # 1. CHECK API KEY
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Wrong API Key")
+
+    events = payload.get("events", [])
+
+    total_events = len(events)
+    users = set()
+    revenue = 0
+    user_totals = {}
+
+    # 2. LOOP THROUGH EVENTS
+    for e in events:
+        user = e.get("user")
+        amount = float(e.get("amount", 0))
+
+        users.add(user)
+
+        # only positive revenue counts
+        if amount > 0:
+            revenue += amount
+
+            if user in user_totals:
+                user_totals[user] += amount
+            else:
+                user_totals[user] = amount
+
+    # 3. FIND TOP USER
+    top_user = None
+    if user_totals:
+        top_user = max(user_totals, key=user_totals.get)
+
+    # 4. RETURN RESULT
+    return {
+        "email": "23f2005564@ds.study.iitm.ac.in",
+        "total_events": total_events,
+        "unique_users": len(users),
+        "revenue": revenue,
+        "top_user": top_user
+    }

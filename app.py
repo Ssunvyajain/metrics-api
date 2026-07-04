@@ -21,7 +21,9 @@ ALLOWED_ORIGIN = "https://dash-tws8op.example.com"
 @app.middleware("http")
 async def cors_and_metrics(request: Request, call_next):
     start = time.time()
-    request_id = str(uuid.uuid4())
+
+    # Reuse incoming X-Request-ID if present, else generate one
+    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
 
     response = await call_next(request)
 
@@ -30,11 +32,14 @@ async def cors_and_metrics(request: Request, call_next):
 
     origin = request.headers.get("origin")
 
-    if origin == ALLOWED_ORIGIN:
-        response.headers["Access-Control-Allow-Origin"] = ALLOWED_ORIGIN
+    # Allow both the Q1 origin and the Q10 origin
+    if origin in [
+        "https://dash-tws8op.example.com",
+        "https://app-nuc1x9.example.com",
+    ]:
+        response.headers["Access-Control-Allow-Origin"] = origin
 
     return response
-
 
 @app.get("/stats")
 def stats(values: str = Query(...)):
@@ -101,18 +106,20 @@ def analytics(payload: dict, x_api_key: str = Header(None)):
         "revenue": revenue,
         "top_user": top_user
     }
-from fastapi import Request
+
+from fastapi import Request, Response
 import uuid
 
 @app.get("/ping")
-def ping(request: Request):
+def ping(request: Request, response: Response):
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+
+    response.headers["X-Request-ID"] = request_id
 
     return {
         "email": "23f2005564@ds.study.iitm.ac.in",
         "request_id": request_id
     }
-
 
 import time
 import json

@@ -28,10 +28,11 @@ async def cors_and_metrics(request: Request, call_next):
     origin = request.headers.get("origin")
 
     # Allow both the Q1 origin and the Q10 origin
-    if origin == ALLOWED_ORIGIN:
-        response.headers["Access-Control-Allow-Origin"] = origin
-
-    return response
+    if origin in [
+        "https://dash-tws8op.example.com",
+        "https://app-nuc1x9.example.com",
+    ]:
+         response.headers["Access-Control-Allow-Origin"] = origin
 
 @app.get("/stats")
 def stats(values: str = Query(...)):

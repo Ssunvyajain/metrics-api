@@ -139,7 +139,9 @@ def work(n: int = 1):
         "done": n
     }
 
-@app.get("/metrics")
+from fastapi.responses import PlainTextResponse
+
+@app.get("/metrics", response_class=PlainTextResponse)
 def metrics():
     return (
         "# HELP http_requests_total Total HTTP requests\n"

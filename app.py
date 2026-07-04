@@ -24,6 +24,8 @@ async def cors_and_metrics(request: Request, call_next):
 
     # Reuse incoming X-Request-ID if present, else generate one
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    request.state.request_id = request_id
+    
 
     response = await call_next(request)
 
@@ -110,9 +112,11 @@ def analytics(payload: dict, x_api_key: str = Header(None)):
 from fastapi import Request, Response
 import uuid
 
+from fastapi import Request, Response
+
 @app.get("/ping")
 def ping(request: Request, response: Response):
-    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    request_id = request.state.request_id
 
     response.headers["X-Request-ID"] = request_id
 

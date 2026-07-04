@@ -112,3 +112,49 @@ def ping(request: Request):
         "email": "23f2005564@ds.study.iitm.ac.in",
         "request_id": request_id
     }
+
+
+import time
+import json
+
+START_TIME = time.time()
+HTTP_COUNTER = 0
+LOGS = []
+
+@app.get("/work")
+def work(n: int = 1):
+    global HTTP_COUNTER
+
+    HTTP_COUNTER += 1
+
+    LOGS.append({
+        "level": "INFO",
+        "ts": time.time(),
+        "path": "/work",
+        "request_id": str(uuid.uuid4())
+    })
+
+    return {
+        "email": "23f2005564@ds.study.iitm.ac.in",
+        "done": n
+    }
+
+@app.get("/metrics")
+def metrics():
+    return (
+        "# HELP http_requests_total Total HTTP requests\n"
+        "# TYPE http_requests_total counter\n"
+        f"http_requests_total {HTTP_COUNTER}\n"
+    )
+
+@app.get("/healthz")
+def healthz():
+    return {
+        "status": "ok",
+        "uptime_s": time.time() - START_TIME
+    }
+
+
+@app.get("/logs/tail")
+def logs_tail(limit: int = 10):
+    return LOGS[-limit:]

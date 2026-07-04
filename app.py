@@ -8,15 +8,8 @@ import time
 app = FastAPI()
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-ALLOWED_ORIGIN = "https://dash-tws8op.example.com"
+ALLOWED_ORIGIN = "https://app-nuc1x9.example.com"
 
 @app.middleware("http")
 async def cors_and_metrics(request: Request, call_next):
@@ -35,10 +28,7 @@ async def cors_and_metrics(request: Request, call_next):
     origin = request.headers.get("origin")
 
     # Allow both the Q1 origin and the Q10 origin
-    if origin in [
-        "https://dash-tws8op.example.com",
-        "https://app-nuc1x9.example.com",
-    ]:
+    if origin == ALLOWED_ORIGIN:
         response.headers["Access-Control-Allow-Origin"] = origin
 
     return response

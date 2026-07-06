@@ -119,6 +119,10 @@ def ping(request: Request, response: Response):
         "email": "23f2005564@ds.study.iitm.ac.in",
         "request_id": request_id
     }
+@app.options("/ping")
+def ping_preflight():
+    return Response(status_code=200)
+
 
 import time
 import json

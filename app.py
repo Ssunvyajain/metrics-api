@@ -45,19 +45,19 @@ async def cors_and_metrics(request: Request, call_next):
 
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time"] = str(time.time() - start)
-
-    origin = request.headers.get("origin")
-
-    # Allow both the Q1 origin and the Q10 origin
+    origin = request.headers.get("origin") or ""
     if origin in [
         "https://dash-tws8op.example.com",
         "https://app-nuc1x9.example.com",
-    ]:
+]:
         response.headers["Access-Control-Allow-Origin"] = origin
+    else:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "X-Request-ID, X-Client-Id, Content-Type"
 
     return response
-
-
 @app.get("/stats")
 def stats(values: str = Query(...)):
     nums = list(map(int, values.split(",")))

@@ -15,6 +15,7 @@ async def middleware(request: Request, call_next):
     start = time.time()
 
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    request.state.request_id = request_id
 
     client_id = request.headers.get("X-Client-Id")
 
@@ -51,11 +52,9 @@ async def middleware(request: Request, call_next):
 
 @app.get("/ping")
 def ping(request: Request):
-    request_id = request.state.request_id if hasattr(request.state, "request_id") else str(uuid.uuid4())
-
     return {
         "email": EMAIL,
-        "request_id": request_id
+        "request_id": request.state.request_id
     }
 
 

@@ -10,6 +10,8 @@ app = FastAPI()
 
 
 ALLOWED_ORIGIN = "https://app-nuc1x9.example.com"
+RATE_LIMIT = {}
+WINDOW = 10
 
 @app.middleware("http")
 async def cors_and_metrics(request: Request, call_next):
@@ -18,6 +20,25 @@ async def cors_and_metrics(request: Request, call_next):
     # Reuse incoming X-Request-ID if present, else generate one
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
     request.state.request_id = request_id
+    
+
+    client_id = request.headers.get("X-Client-Id")
+
+    if client_id:
+        now = time.time()
+
+        if client_id not in RATE_LIMIT:
+            RATE_LIMIT[client_id] = []
+
+        RATE_LIMIT[client_id] = [
+            t for t in RATE_LIMIT[client_id]
+            if now - t < WINDOW
+        ]
+
+        if len(RATE_LIMIT[client_id]) >= 14:
+            return Response(status_code=429)
+
+        RATE_LIMIT[client_id].append(now)
     
 
     response = await call_next(request)
@@ -36,7 +57,6 @@ async def cors_and_metrics(request: Request, call_next):
 
     return response
 
-@app.get("/stats")
 
 @app.get("/stats")
 def stats(values: str = Query(...)):

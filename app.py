@@ -32,7 +32,11 @@ async def cors_and_metrics(request: Request, call_next):
         "https://dash-tws8op.example.com",
         "https://app-nuc1x9.example.com",
     ]:
-         response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Origin"] = origin
+
+    return response
+
+@app.get("/stats")
 
 @app.get("/stats")
 def stats(values: str = Query(...)):
